@@ -1,52 +1,54 @@
 # Tiny Tapeout project information
 project:
-  title:        ""      # Project title
-  author:       ""      # Your name
-  discord:      ""      # Your discord username, for communication and automatically assigning you a Tapeout role (optional)
-  description:  ""      # One line description of what your project does
-  language:     "Verilog" # other examples include SystemVerilog, Amaranth, VHDL, etc
+  title:        "MatMul-Free Streaming Neuron"
+  author:       "John Minnick"
+  discord:      ""
+  description:  "Ternary-weight MAC unit from Scalable MatMul-free Language Modeling (Zhu et al.)"
+  language:     "Verilog"
   clock_hz:     0       # Clock frequency in Hz (or 0 if not applicable)
 
   # How many tiles your design occupies? A single tile is about 167x108 uM.
-  tiles: "1x1"          # Valid values: 1x1, 1x2, 2x2, 3x2, 4x2, 6x2 or 8x2
+  # CRITICAL: Using 2x2 for virtual tapeout — 4x the standard area to guarantee
+  #           OpenLane physical synthesis passes without density/congestion errors.
+  tiles: "2x2"
 
-  # Your top module name must start with "tt_um_". Make it unique by including your github username:
-  top_module:  "tt_um_example"
+  # Top module for the MatMul-Free streaming neuron
+  top_module:  "tt_um_matmul_free"
 
   # List your project's source files here.
   # Source files must be in ./src and you must list each source file separately, one per line.
   # Don't forget to also update `PROJECT_SOURCES` in test/Makefile.
   source_files:
-    - "project.v"
+    - "tt_um_matmul_free.v"
 
 # The pinout of your project. Leave unused pins blank. DO NOT delete or add any pins.
-# This section is for the datasheet/website. Use descriptive names (e.g., RX, TX, MOSI, SCL, SEG_A, etc.).
+# This section is for the datasheet/website. Use descriptive names.
 pinout:
-  # Inputs
-  ui[0]: ""
-  ui[1]: ""
-  ui[2]: ""
-  ui[3]: ""
-  ui[4]: ""
-  ui[5]: ""
-  ui[6]: ""
-  ui[7]: ""
+  # Inputs — 8-bit signed activation value streamed in each cycle
+  ui[0]: "activation_in[0]"
+  ui[1]: "activation_in[1]"
+  ui[2]: "activation_in[2]"
+  ui[3]: "activation_in[3]"
+  ui[4]: "activation_in[4]"
+  ui[5]: "activation_in[5]"
+  ui[6]: "activation_in[6]"
+  ui[7]: "activation_in[7] (sign bit)"
 
-  # Outputs
-  uo[0]: ""
-  uo[1]: ""
-  uo[2]: ""
-  uo[3]: ""
-  uo[4]: ""
-  uo[5]: ""
-  uo[6]: ""
-  uo[7]: ""
+  # Outputs — 8-bit signed saturated accumulator output
+  uo[0]: "activation_out[0]"
+  uo[1]: "activation_out[1]"
+  uo[2]: "activation_out[2]"
+  uo[3]: "activation_out[3]"
+  uo[4]: "activation_out[4]"
+  uo[5]: "activation_out[5]"
+  uo[6]: "activation_out[6]"
+  uo[7]: "activation_out[7] (sign bit)"
 
-  # Bidirectional pins
-  uio[0]: ""
-  uio[1]: ""
-  uio[2]: ""
-  uio[3]: ""
+  # Bidirectional pins — weight encoding + control signals
+  uio[0]: "weight_bit_0"
+  uio[1]: "weight_bit_1"
+  uio[2]: "valid"
+  uio[3]: "clear_acc"
   uio[4]: ""
   uio[5]: ""
   uio[6]: ""
