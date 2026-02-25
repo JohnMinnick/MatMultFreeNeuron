@@ -8,9 +8,8 @@ project:
   clock_hz:     0       # Clock frequency in Hz (or 0 if not applicable)
 
   # How many tiles your design occupies? A single tile is about 167x108 uM.
-  # CRITICAL: Using 2x2 for virtual tapeout — 4x the standard area to guarantee
-  #           OpenLane physical synthesis passes without density/congestion errors.
-  tiles: "2x2"
+  # Design uses ~106 cells out of ~1000 available — 1x1 is sufficient.
+  tiles: "1x1"
 
   # Top module for the MatMul-Free streaming neuron
   top_module:  "tt_um_matmul_free"
