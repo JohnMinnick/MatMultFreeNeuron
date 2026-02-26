@@ -1,42 +1,76 @@
 ![](../../workflows/gds/badge.svg) ![](../../workflows/docs/badge.svg) ![](../../workflows/test/badge.svg) ![](../../workflows/fpga/badge.svg)
 
-# Tiny Tapeout Verilog Project Template
+# MatMul-Free Streaming Neuron
 
-- [Read the documentation for project](docs/info.md)
+A hardware implementation of the ternary-weight dense layer from [**"Scalable MatMul-free Language Modeling"**](https://arxiv.org/abs/2406.02528) (Zhu et al., 2024), built for the [TinyTapeout](https://tinytapeout.com) SkyWater 130nm shuttle.
 
-## What is Tiny Tapeout?
+> **Key idea:** Replace expensive matrix multipliers with pure ternary addition/subtraction. Each weight is encoded as {-1, 0, +1}, so a "multiply-accumulate" becomes just add, subtract, or skip — no DSP required.
 
-Tiny Tapeout is an educational project that aims to make it easier and cheaper than ever to get your digital and analog designs manufactured on a real chip.
+📄 [Full project documentation →](docs/info.md)
 
-To learn more and get started, visit https://tinytapeout.com.
+## Architecture
 
-## Set up your Verilog project
+```
+ui_in[7:0] ──► sign-extend to 16b ──► ternary MUX ──► accumulator[15:0] ──► saturate ──► uo_out[7:0]
+                                        ▲
+uio_in[1:0] (weight encoding) ─────────┘
+uio_in[2]   (valid strobe)
+uio_in[3]   (clear_acc)
+```
 
-1. Add your Verilog files to the `src` folder.
-2. Edit the [info.yaml](info.yaml) and update information about your project, paying special attention to the `source_files` and `top_module` properties. If you are upgrading an existing Tiny Tapeout project, check out our [online info.yaml migration tool](https://tinytapeout.github.io/tt-yaml-upgrade-tool/).
-3. Edit [docs/info.md](docs/info.md) and add a description of your project.
-4. Adapt the testbench to your design. See [test/README.md](test/README.md) for more information.
+Over *N* clock cycles, 8-bit signed activations and 2-bit ternary weights are streamed into a **16-bit internal accumulator**. The output is the accumulator value **saturated to the 8-bit signed range** [-128, +127], acting as a built-in activation function.
 
-The GitHub action will automatically build the ASIC files using [LibreLane](https://www.zerotoasiccourse.com/terminology/librelane/).
+### Weight Encoding (`uio_in[1:0]`)
 
-## Enable GitHub actions to build the results page
+| Code | Weight | Operation |
+|------|--------|-----------|
+| `2'b01` | +1 | `acc += activation` |
+| `2'b10` | -1 | `acc -= activation` |
+| `2'b00` | 0 | Hold (no-op) |
+| `2'b11` | 0 | Hold (reserved) |
 
-- [Enabling GitHub Pages](https://tinytapeout.com/faq/#my-github-action-is-failing-on-the-pages-part)
+### Pin Mapping
 
-## Resources
+| Pin | Direction | Signal |
+|-----|-----------|--------|
+| `ui_in[7:0]` | Input | 8-bit signed activation |
+| `uo_out[7:0]` | Output | 8-bit signed saturated result |
+| `uio_in[0]` | Input | weight_bit_0 |
+| `uio_in[1]` | Input | weight_bit_1 |
+| `uio_in[2]` | Input | valid (gates accumulation) |
+| `uio_in[3]` | Input | clear_acc (synchronous reset) |
 
-- [FAQ](https://tinytapeout.com/faq/)
-- [Digital design lessons](https://tinytapeout.com/digital_design/)
-- [Learn how semiconductors work](https://tinytapeout.com/siliwiz/)
-- [Join the community](https://tinytapeout.com/discord)
-- [Build your design locally](https://www.tinytapeout.com/guides/local-hardening/)
+## Design Constraints
 
-## What next?
+This is strictly **synthesizable Verilog-2001** following these rules:
+- No SystemVerilog constructs (`logic`, `always_comb`, `always_ff`)
+- Explicit sign-extension via concatenation (no `$signed()`)
+- Default assignments in all combinational blocks (no inferred latches)
+- Synchronous active-low reset (`rst_n`)
 
-- [Submit your design to the next shuttle](https://app.tinytapeout.com/).
-- Edit [this README](README.md) and explain your design, how it works, and how to test it.
-- Share your project on your social network of choice:
-  - LinkedIn [#tinytapeout](https://www.linkedin.com/search/results/content/?keywords=%23tinytapeout) [@TinyTapeout](https://www.linkedin.com/company/100708654/)
-  - Mastodon [#tinytapeout](https://chaos.social/tags/tinytapeout) [@matthewvenn](https://chaos.social/@matthewvenn)
-  - X (formerly Twitter) [#tinytapeout](https://twitter.com/hashtag/tinytapeout) [@tinytapeout](https://twitter.com/tinytapeout)
-  - Bluesky [@tinytapeout.com](https://bsky.app/profile/tinytapeout.com)
+## Verification
+
+The [Cocotb test suite](test/test.py) includes:
+
+| Test | Description |
+|------|-------------|
+| `test_ternary_mac` | 100-cycle random stress test with Python golden model |
+| `test_saturation_clamp` | Positive/negative overflow, clear, weight hold, valid gating |
+
+### Run locally via Docker
+
+```bash
+docker run --rm -v "$(pwd):/workspace" jeshragh/ece183-293-win \
+  bash -c "cd /workspace/test && make -B"
+```
+
+### Expected output
+
+```
+TESTS=2 PASS=2 FAIL=0 SKIP=0
+```
+
+## References
+
+- Zhu, R., Zhang, Y., Sifferman, E., et al. (2024). *Scalable MatMul-free Language Modeling.* [arXiv:2406.02528](https://arxiv.org/abs/2406.02528)
+- [TinyTapeout](https://tinytapeout.com) — educational ASIC shuttle program
