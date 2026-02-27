@@ -41,7 +41,7 @@ class ArchitectureDatapath(Scene):
         title = Text("Streaming Ternary MAC - Datapath", font_size=28,
                       color=ACCENT_BLUE, weight=BOLD)
         title.to_edge(UP, buff=0.3)
-        self.play(Write(title), run_time=0.3)
+        self.play(Write(title), run_time=0.6)
 
         # -- Build blocks --
         def make_block(label, width=2.0, height=0.8, color=ACCENT_BLUE):
@@ -118,27 +118,27 @@ class ArchitectureDatapath(Scene):
         fb_label.next_to(feedback, UP, buff=0.05)
 
         # -- Animate: blocks appear left to right --
-        self.play(FadeIn(inp), run_time=0.3)
-        self.play(GrowArrow(arr1), FadeIn(sext), run_time=0.3)
-        self.play(GrowArrow(arr2), FadeIn(mux), run_time=0.3)
-        self.play(GrowArrow(arr3), FadeIn(acc), run_time=0.3)
-        self.play(GrowArrow(arr4), FadeIn(sat), run_time=0.3)
-        self.play(GrowArrow(arr5), FadeIn(out_label), run_time=0.3)
-        self.play(FadeIn(weight_label), GrowArrow(arr_w), run_time=0.3)
-        self.play(FadeIn(ctrls), GrowArrow(arr_c), run_time=0.3)
-        self.play(Create(feedback), FadeIn(fb_label), run_time=0.4)
+        self.play(FadeIn(inp), run_time=0.6)
+        self.play(GrowArrow(arr1), FadeIn(sext), run_time=0.6)
+        self.play(GrowArrow(arr2), FadeIn(mux), run_time=0.6)
+        self.play(GrowArrow(arr3), FadeIn(acc), run_time=0.6)
+        self.play(GrowArrow(arr4), FadeIn(sat), run_time=0.6)
+        self.play(GrowArrow(arr5), FadeIn(out_label), run_time=0.6)
+        self.play(FadeIn(weight_label), GrowArrow(arr_w), run_time=0.6)
+        self.play(FadeIn(ctrls), GrowArrow(arr_c), run_time=0.6)
+        self.play(Create(feedback), FadeIn(fb_label), run_time=0.8)
 
         # Data flow pulse animation
-        self.wait(0.2)
+        self.wait(0.5)
         dot = Dot(color=ACCENT_GREEN, radius=0.1).move_to(inp.get_right())
         glow = dot.copy().set_opacity(0.3).scale(2)
         pulse = VGroup(glow, dot)
-        self.play(FadeIn(pulse), run_time=0.15)
+        self.play(FadeIn(pulse), run_time=0.3)
         for pt in [sext.get_center(), mux.get_center(),
                    acc.get_center(), sat.get_center(), out_label.get_left()]:
-            self.play(pulse.animate.move_to(pt), run_time=0.25)
-        self.play(FadeOut(pulse), run_time=0.15)
-        self.wait(0.5)
+            self.play(pulse.animate.move_to(pt), run_time=0.5)
+        self.play(FadeOut(pulse), run_time=0.3)
+        self.wait(1.0)
 
 
 # =====================================================================
@@ -153,7 +153,7 @@ class TimingDiagram(Scene):
         title = Text("Timing Diagram - 5-Cycle MAC Operation", font_size=24,
                       color=ACCENT_BLUE, weight=BOLD)
         title.to_edge(UP, buff=0.25)
-        self.play(Write(title), run_time=0.4)
+        self.play(Write(title), run_time=0.8)
 
         # Simulation data: (activation, weight_code, weight_label, acc_after)
         cycles = [
@@ -181,7 +181,7 @@ class TimingDiagram(Scene):
             t.move_to([label_x, y, 0]).align_to([label_x, y, 0], RIGHT)
             label_objs.append(t)
 
-        self.play(*[FadeIn(l) for l in label_objs], run_time=0.3)
+        self.play(*[FadeIn(l) for l in label_objs], run_time=0.6)
 
         # Draw timing waveforms cycle by cycle
         for cyc_i, (act, wt, wt_lbl, acc_val) in enumerate(cycles):
@@ -264,15 +264,15 @@ class TimingDiagram(Scene):
                                  stroke_opacity=0.3)
                 cyc_elements.add(sep)
 
-            self.play(FadeIn(cyc_elements), run_time=0.4)
+            self.play(FadeIn(cyc_elements), run_time=0.8)
 
         # Annotation for saturation event
-        self.wait(0.3)
+        self.wait(0.6)
         sat_note = Text("Accumulator 130 > 127 -> output clamped!", font_size=13,
                         color=ACCENT_RED, weight=BOLD)
         sat_note.to_edge(DOWN, buff=0.4)
-        self.play(FadeIn(sat_note), run_time=0.3)
-        self.wait(0.8)
+        self.play(FadeIn(sat_note), run_time=0.6)
+        self.wait(1.5)
 
 
 # =====================================================================
@@ -287,7 +287,7 @@ class SaturationClamp(Scene):
         title = Text("Output Saturation Clamp", font_size=26,
                       color=ACCENT_BLUE, weight=BOLD)
         title.to_edge(UP, buff=0.3)
-        self.play(Write(title), run_time=0.4)
+        self.play(Write(title), run_time=0.8)
 
         # Create axes — compact and shifted right to leave room for y-label
         ax = Axes(
@@ -313,12 +313,12 @@ class SaturationClamp(Scene):
         x_label = Text("Accumulator Value (16-bit)", font_size=13, color=TEXT_COLOR)
         x_label.to_edge(DOWN, buff=0.55)
 
-        self.play(Create(ax), FadeIn(x_label), FadeIn(y_label), run_time=0.5)
+        self.play(Create(ax), FadeIn(x_label), FadeIn(y_label), run_time=1.0)
 
         # Identity line (very faint reference)
         identity = ax.plot(lambda x: x, x_range=[-200, 200],
                            color=WIRE_COLOR, stroke_width=1, stroke_opacity=0.2)
-        self.play(Create(identity), run_time=0.3)
+        self.play(Create(identity), run_time=0.6)
 
         # Saturation function drawn as 3 segments
         seg_mid = ax.plot(lambda x: x, x_range=[-128, 127],
@@ -329,30 +329,30 @@ class SaturationClamp(Scene):
                          color=ACCENT_RED, stroke_width=3)
 
         # Linear region label — upper-left, well clear of the line
-        self.play(Create(seg_mid), run_time=0.4)
+        self.play(Create(seg_mid), run_time=0.8)
         lin_label = Text("Linear\nregion", font_size=12, color=ACCENT_GREEN)
         lin_label.move_to(ax.c2p(-280, 100))
-        self.play(FadeIn(lin_label), run_time=0.2)
+        self.play(FadeIn(lin_label), run_time=0.4)
 
         # Upper saturation — label to the right, outside plot area
-        self.play(Create(seg_pos), run_time=0.3)
+        self.play(Create(seg_pos), run_time=0.6)
         upper_line = DashedLine(
             ax.c2p(-400, 127), ax.c2p(400, 127),
             stroke_color=ACCENT_RED, stroke_width=1, stroke_opacity=0.35
         )
         upper_label = Text("+127 clamp", font_size=12, color=ACCENT_RED, weight=BOLD)
         upper_label.next_to(ax.c2p(400, 127), RIGHT, buff=0.1)
-        self.play(Create(upper_line), FadeIn(upper_label), run_time=0.3)
+        self.play(Create(upper_line), FadeIn(upper_label), run_time=0.6)
 
         # Lower saturation — label to the right, outside plot area
-        self.play(Create(seg_neg), run_time=0.3)
+        self.play(Create(seg_neg), run_time=0.6)
         lower_line = DashedLine(
             ax.c2p(-400, -128), ax.c2p(400, -128),
             stroke_color=ACCENT_RED, stroke_width=1, stroke_opacity=0.35
         )
         lower_label = Text("-128 clamp", font_size=12, color=ACCENT_RED, weight=BOLD)
         lower_label.next_to(ax.c2p(400, -128), RIGHT, buff=0.1)
-        self.play(Create(lower_line), FadeIn(lower_label), run_time=0.3)
+        self.play(Create(lower_line), FadeIn(lower_label), run_time=0.6)
 
         # Subtitle at bottom (below x-label)
         subtitle = Text(
@@ -360,6 +360,6 @@ class SaturationClamp(Scene):
             font_size=13, color=ACCENT_YELLOW
         )
         subtitle.to_edge(DOWN, buff=0.15)
-        self.play(FadeIn(subtitle), run_time=0.3)
+        self.play(FadeIn(subtitle), run_time=0.6)
 
-        self.wait(0.8)
+        self.wait(1.5)
