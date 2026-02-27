@@ -110,9 +110,9 @@ class ArchitectureDatapath(Scene):
         arr_c = Arrow(ctrls.get_top(), acc.get_bottom(), buff=0.08,
                       stroke_color=ACCENT_RED, stroke_width=2, max_tip_length_to_length_ratio=0.2)
 
-        # Feedback arrow from accumulator back to mux
+        # Feedback arrow from accumulator back to mux (arcs OVER the top)
         feedback = CurvedArrow(acc.get_top(), mux.get_top(),
-                               angle=-TAU/6, stroke_color=ACCENT_PURPLE,
+                               angle=TAU/4, stroke_color=ACCENT_PURPLE,
                                stroke_width=2, tip_length=0.12)
         fb_label = Text("feedback", font_size=10, color=ACCENT_PURPLE)
         fb_label.next_to(feedback, UP, buff=0.05)
