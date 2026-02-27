@@ -302,16 +302,16 @@ class SaturationClamp(Scene):
                 "tick_size": 0.04,
             },
             tips=False,
-        ).shift(RIGHT * 0.8 + UP * 0.2)
+        ).shift(RIGHT * 0.4 + UP * 0.15)
 
-        # Y-axis label — rotated, placed at far-left edge of scene (no overlap)
+        # Y-axis label — rotated, positioned near the axis but clear of tick numbers
         y_label = Text("Output (8-bit)", font_size=13, color=TEXT_COLOR)
         y_label.rotate(PI / 2)
-        y_label.to_edge(LEFT, buff=0.15)  # Far-left edge
+        y_label.next_to(ax.y_axis, LEFT, buff=0.35)
 
-        # X-axis label — at bottom edge of scene (no overlap)
+        # X-axis label — below the axis with moderate buffer
         x_label = Text("Accumulator Value (16-bit)", font_size=13, color=TEXT_COLOR)
-        x_label.to_edge(DOWN, buff=0.55)  # Bottom edge
+        x_label.next_to(ax.x_axis, DOWN, buff=0.35)
 
         self.play(Create(ax), FadeIn(x_label), FadeIn(y_label), run_time=0.5)
 
