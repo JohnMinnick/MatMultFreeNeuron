@@ -307,7 +307,7 @@ class SaturationClamp(Scene):
         # Y-axis label — rotated, positioned near the axis but clear of tick numbers
         y_label = Text("Output (8-bit)", font_size=13, color=TEXT_COLOR)
         y_label.rotate(PI / 2)
-        y_label.to_edge(LEFT, buff=0.15)
+        y_label.to_edge(LEFT, buff=0.5)
 
         # X-axis label at bottom edge of scene
         x_label = Text("Accumulator Value (16-bit)", font_size=13, color=TEXT_COLOR)
